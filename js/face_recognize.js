@@ -1,0 +1,213 @@
+const video = document.createElement('video');
+video.width = 400;
+video.height = 300;
+
+let volumeFunction;
+
+let camera = false;
+
+let videoStream;
+let audioStream;
+
+
+let faceMesh;
+
+/*
+Load models
+ */
+
+let resolvePromise;
+async function loadExpression() {
+    await new Promise(function (resolve, reject){
+        resolvePromise = resolve;
+        detectionWorker.postMessage({orderType: loadModel});
+    });
+}
+//
+
+async function loadFaceMesh() {
+    faceMesh = new FaceMesh({
+        locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        }
+    });
+    faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+    });
+
+    faceMesh.onResults(async function (results) {
+        try {
+            const face = results['multiFaceLandmarks'][0];
+            if (face) {
+                const essentialStuff = getEssentialStuff(face);
+                detectionCallback(JSON.stringify({
+                    'expressions': expressions,
+                    'face': {
+                        landmarks: essentialStuff.faceLandmarks,
+                        ratio: essentialStuff.ratio,
+                        scale: essentialStuff.scale,
+                        leftEyeOpen: essentialStuff.leftEyeOpen,
+                        rightEyeOpen: essentialStuff.rightEyeOpen,
+                        mouthOpen: essentialStuff.mouthOpen,
+                        center: essentialStuff.center
+                    },
+                    'angle': calculateFaceAngle(face),
+                    'volume': volumeFunction(),
+                }));
+            }
+        } catch (err) {
+            console.log('error h > ' + err);
+        }
+    });
+    await faceMesh.initialize();
+}
+
+
+/*
+Request
+ */
+
+let _startFaceInterval;
+let _startEmotionInternal;
+
+async function start() {
+    _startFaceInterval = setInterval(() => {
+        faceMesh.send({image: video});
+    }, 1000 / 30); // 120fps
+    _startEmotionInternal = setInterval(() => {
+        requestExpression();
+    }, 200);
+}
+
+async function getAvailableDevices() {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(device => device.kind === 'videoinput')
+    const mics = devices.filter(device => device.kind === 'audioinput')
+    return JSON.stringify({
+        cams: cams,
+        mics: mics,
+    });
+    // console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
+}
+
+async function getDevicePermission() {
+    const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+    });
+    if (stream) {
+        stream.getVideoTracks().forEach(function (track) {
+            track.stop();
+        });
+        stream.getAudioTracks().forEach(function (track) {
+            track.stop();
+        });
+        return true;
+    } else {
+        return false;
+    }
+}
+
+async function turnOnCamera(deviceIds) {
+    const constraints = {
+        video: {deviceId: deviceIds[0] ? {exact: deviceIds[0]} : undefined},
+        audio: {deviceId: deviceIds[1] ? {exact: deviceIds[1]} : undefined}
+    };
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    if (stream) {
+        camera = true;
+        videoStream = new MediaStream([stream.getVideoTracks()[0]]);
+        audioStream = new MediaStream([stream.getAudioTracks()[0]]);
+        video.srcObject = videoStream;
+        video.load();
+        await video.play();
+        voiceSetting(audioStream);
+    }
+    return true;
+}
+
+function voiceSetting(stream) {
+    const audioContext = new AudioContext();
+    const audioSource = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.minDecibels = -127;
+    analyser.maxDecibels = 0;
+    analyser.smoothingTimeConstant = 0;
+    audioSource.connect(analyser);
+    const volumes = new Uint8Array(analyser.frequencyBinCount);
+    volumeFunction = () => {
+        analyser.getByteFrequencyData(volumes);
+        let volumeSum = 0;
+        for (const volume of volumes)
+            volumeSum += volume;
+        const averageVolume = volumeSum / volumes.length;
+        // Value range: 127 = analyser.maxDecibels - analyser.minDecibels;
+        return (averageVolume * 100 / 127);
+    };
+}
+
+
+function closeDetection() {
+    if (_startFaceInterval) {
+        clearInterval(_startFaceInterval);
+    }
+    if (_startEmotionInternal) {
+        clearInterval(_startEmotionInternal);
+    }
+    if (videoStream && audioStream) {
+        videoStream.getTracks().forEach(function (track) {
+            track.stop();
+        });
+        audioStream.getTracks().forEach(function (track) {
+            track.stop();
+        });
+        videoStream = null;
+        audioStream = null;
+        camera = false;
+
+        video.srcObject = null;
+    }
+}
+
+
+/*
+worker
+ */
+
+const detectionWorker = new Worker('/js/worker/expression_worker.js');
+let expressions;
+detectionWorker.onmessage = async function (event){
+    const {respondType} = event.data;
+    switch (respondType) {
+        case getExpression:
+            expressions = event.data.data;
+            break;
+        case modelLoaded:
+            resolvePromise();
+            break;
+    }
+};
+
+function requestExpression() {
+    detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
+}
+
+
+function getCaptureFrame() {
+    try {
+        const canvasElement = new OffscreenCanvas(video.videoWidth, video.videoHeight);
+        const capCtx = canvasElement.getContext('2d');
+        capCtx.translate(video.width, 0);
+        capCtx.scale(-1, 1);
+        capCtx.drawImage(video, 0, 0);
+        return capCtx.getImageData(0, 0, video.videoWidth, video.videoHeight);
+    } catch (e) {
+        return null;
+    }
+}
+
+

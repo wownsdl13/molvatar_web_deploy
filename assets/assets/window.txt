@@ -1,0 +1,191 @@
+static std::string MOUSE = "MOUSE";
+static std::string MOUSE_DOWN = "MOUSE_DOWN";
+static std::string MOUSE_UP = "MOUSE_UP";
+static std::string KEYBOARD_DOWN = "KEYBOARD_DOWN";
+static std::string KEYBOARD_UP = "KEYBOARD_UP";
+static std::string MIC_VOLUME = "MIC_VOLUME";
+std::unique_ptr<flutter::EventSink<flutter::EncodableValue>> eventSink = NULL;
+void configEventChannel(flutter::FlutterEngine*);
+void configMethodChannel(flutter::FlutterEngine* engine);
+std::unique_ptr < flutter::StreamHandlerError<flutter::EncodableValue>> on_listen(const flutter::EncodableValue* arguments,
+    std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events);
+std::unique_ptr < flutter::StreamHandlerError<flutter::EncodableValue>> on_cancel(const flutter::EncodableValue* arguments);
+void sentEvent(std::string key, std::string data);
+
+HMODULE g_hModule;
+HHOOK g_hKeyboard;
+HHOOK g_hMouse;
+
+LRESULT CALLBACK keyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK mouseProc( int nCode, WPARAM wParam, LPARAM lParam );
+void setHook();
+
+
+HRESULT recordAudioStream();
+void getPeakVolume(IAudioMeterInformation* pMeterInfo);
+
+
+
+
+
+
+
+
+
+/////////////
+
+
+FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
+                              WPARAM const wparam,
+                              LPARAM const lparam) noexcept {
+  // Give Flutter, including plugins, an opportunity to handle window messages.
+  if (flutter_controller_) {
+    std::optional<LRESULT> result =
+        flutter_controller_->HandleTopLevelWindowProc(hwnd, message, wparam,
+                                                      lparam);
+    if (result) {
+      return *result;
+    }
+  }
+
+  switch (message) {
+    case WM_FONTCHANGE:
+      flutter_controller_->engine()->ReloadSystemFonts();
+      break;
+  }
+
+  return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
+}
+
+void configMethodChannel(flutter::FlutterEngine* engine) {
+    std::string startChannel = "startChannel";
+    const flutter::StandardMethodCodec& codec = flutter::StandardMethodCodec::GetInstance();
+    flutter::MethodChannel method_channel_(engine->messenger(), startChannel, &codec);
+    method_channel_.SetMethodCallHandler([](const auto& call, auto result) {
+        setHook();
+        recordAudioStream();
+        result->Success(flutter::EncodableValue("Call Start Successfully!"));
+        });
+}
+
+
+void configEventChannel(flutter::FlutterEngine* engine) {
+    std::string eventChannel = "keyboardMouseHandler";
+    const flutter::StandardMethodCodec& codec = flutter::StandardMethodCodec::GetInstance();
+    flutter::EventChannel event_channel_(engine->messenger(), eventChannel, &codec);
+
+    event_channel_.SetStreamHandler(
+        std::make_unique<flutter::StreamHandlerFunctions<flutter::EncodableValue>>(on_listen, on_cancel)
+    );
+}
+
+std::unique_ptr < flutter::StreamHandlerError<flutter::EncodableValue>> on_listen(const flutter::EncodableValue* arguments,
+    std::unique_ptr<flutter::EventSink<flutter::EncodableValue>>&& events) {
+    eventSink = std::move(events);
+    return NULL;
+}
+
+
+std::unique_ptr < flutter::StreamHandlerError<flutter::EncodableValue>> on_cancel(const flutter::EncodableValue* arguments) {
+
+    return NULL;
+}
+
+void sentEvent(std::string key, std::string data) {
+    flutter::EventSink<flutter::EncodableValue>* sink = eventSink.get();
+    sink->Success(flutter::EncodableValue::EncodableValue(key + ' ' + data));
+}
+
+////////////////////////////////////
+
+void setHook() {
+    g_hModule = GetModuleHandle(NULL);
+    if (NULL != g_hModule) {
+        g_hKeyboard = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardProc, g_hModule, NULL);
+        g_hMouse = SetWindowsHookEx(WH_MOUSE_LL, mouseProc, g_hModule, NULL);
+
+    }
+    if (NULL == g_hKeyboard) {
+        // error
+    }
+
+    if (NULL == g_hMouse) {
+        // error
+    }
+}
+
+LRESULT CALLBACK keyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    KBDLLHOOKSTRUCT k = *(KBDLLHOOKSTRUCT*)lParam;
+    if ((WM_KEYDOWN == wParam) || (WM_SYSKEYDOWN == wParam)) {
+        sentEvent(KEYBOARD_DOWN, std::to_string(k.vkCode));
+    }
+    else if((WM_KEYUP == wParam) || (WM_SYSKEYUP == wParam)) {
+        sentEvent(KEYBOARD_UP, std::to_string(k.vkCode));
+    }
+    return CallNextHookEx(g_hKeyboard, nCode, wParam, lParam);
+}
+
+LRESULT mouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    MOUSEHOOKSTRUCT* pMouse = (MOUSEHOOKSTRUCT*)lParam; // pMouse->pt.x, pMouse->pt.y
+
+    if ( WM_MOUSEMOVE == wParam ) {
+        sentEvent(MOUSE, "(" + std::to_string(pMouse->pt.x) + "," + std::to_string(pMouse->pt.y) + ")");
+    }
+    else if ( WM_LBUTTONDOWN == wParam || WM_RBUTTONDOWN == wParam) {
+        sentEvent(MOUSE_DOWN, "_");
+    }
+
+    else if ( WM_LBUTTONUP == wParam || WM_RBUTTONUP == wParam) {
+        sentEvent(MOUSE_UP, "_");
+    }
+    return CallNextHookEx(g_hMouse, nCode, wParam, lParam );
+}
+
+
+
+
+HRESULT recordAudioStream()
+{
+    HRESULT hr;
+    IMMDeviceEnumerator* pEnumerator = NULL;
+    IMMDevice* pDevice = NULL;
+    IAudioMeterInformation* pMeterInfo = NULL;
+
+    hr = CoCreateInstance(
+        __uuidof(MMDeviceEnumerator), NULL,
+        CLSCTX_ALL, __uuidof(IMMDeviceEnumerator),
+        (void**)&pEnumerator);
+
+    if (FAILED(hr)) {
+        exit(0);
+    }
+
+
+//    hr = pEnumerator->GetDevice('', &pDevice); ''곳에 STRING으로 ID가 들어가야 한다.
+    hr = pEnumerator->GetDefaultAudioEndpoint(
+            eCapture, eConsole, &pDevice);
+    if (FAILED(hr)) {
+        exit(0);
+    }
+
+
+    hr = pDevice->Activate(
+        __uuidof(IAudioMeterInformation), CLSCTX_ALL,
+            NULL, (void**)&pMeterInfo);
+    if (FAILED(hr)) {
+    }
+    std::thread volumeTrhead(getPeakVolume, pMeterInfo);
+    volumeTrhead.detach();
+    return hr;
+}
+
+void getPeakVolume(IAudioMeterInformation* pMeterInfo) {
+    while (true) {
+        float peak = -1;
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        pMeterInfo->GetPeakValue(&peak);
+        sentEvent(MIC_VOLUME, std::to_string(peak));
+    }
+}
+
+
