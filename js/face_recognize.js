@@ -40,13 +40,14 @@ async function loadFaceMesh() {
 
     faceMesh.onResults(async function (results) {
         try {
+
             const face = results['multiFaceLandmarks'][0];
             if (face) {
                 const essentialStuff = getEssentialStuff(face);
                 detectionCallback(JSON.stringify({
                     'expressions': expressions,
                     'face': {
-                        landmarks: essentialStuff.faceLandmarks,
+                        // landmarks: essentialStuff.faceLandmarks,
                         ratio: essentialStuff.ratio,
                         scale: essentialStuff.scale,
                         leftEyeOpen: essentialStuff.leftEyeOpen,
@@ -61,6 +62,15 @@ async function loadFaceMesh() {
         } catch (err) {
             console.log('error h > ' + err);
         }
+
+        setTimeout(() => {
+            if(faceDetecting) {
+                faceMesh.send({image: video});
+            }
+        }, 1);
+        // if(faceDetecting) {
+        //     faceMesh.send({image: video});
+        // }
     });
     await faceMesh.initialize();
 }
@@ -70,13 +80,12 @@ async function loadFaceMesh() {
 Request
  */
 
-let _startFaceInterval;
+let faceDetecting = false;
 let _startEmotionInternal;
 
 async function start() {
-    _startFaceInterval = setInterval(() => {
-        faceMesh.send({image: video});
-    }, 1000 / 30); // 120fps
+    faceDetecting = true;
+    faceMesh.send({image: video});
     _startEmotionInternal = setInterval(() => {
         requestExpression();
     }, 200);
@@ -118,15 +127,32 @@ async function turnOnCamera(deviceIds) {
     };
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     if (stream) {
-        camera = true;
-        videoStream = new MediaStream([stream.getVideoTracks()[0]]);
-        audioStream = new MediaStream([stream.getAudioTracks()[0]]);
-        video.srcObject = videoStream;
-        video.load();
-        await video.play();
-        voiceSetting(audioStream);
+        if(stream.getVideoTracks().length>0) {
+            const oldVideo = videoStream;
+            camera = true;
+            videoStream = new MediaStream([stream.getVideoTracks()[0]]);
+            video.srcObject = videoStream;
+            video.load();
+            await video.play();
+            if(oldVideo){
+                oldVideo.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+            }
+            if (stream.getAudioTracks().length > 0) {
+                const oldAudio = audioStream;
+                audioStream = new MediaStream([stream.getAudioTracks()[0]]);
+                voiceSetting(audioStream);
+                if(oldAudio){
+                    oldAudio.getTracks().forEach(function (track) {
+                        track.stop();
+                    });
+                }
+            }
+            return true;
+        }
     }
-    return true;
+    return false;
 }
 
 function voiceSetting(stream) {
@@ -152,9 +178,7 @@ function voiceSetting(stream) {
 
 
 function closeDetection() {
-    if (_startFaceInterval) {
-        clearInterval(_startFaceInterval);
-    }
+    faceDetecting = false;
     if (_startEmotionInternal) {
         clearInterval(_startEmotionInternal);
     }
@@ -168,7 +192,6 @@ function closeDetection() {
         videoStream = null;
         audioStream = null;
         camera = false;
-
         video.srcObject = null;
     }
 }
