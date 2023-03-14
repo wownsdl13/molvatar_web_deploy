@@ -12,18 +12,7 @@ let audioStream;
 
 let faceMesh;
 
-/*
-Load models
- */
-
 let resolvePromise;
-async function loadExpression() {
-    await new Promise(function (resolve, reject){
-        resolvePromise = resolve;
-        detectionWorker.postMessage({orderType: loadModel});
-    });
-}
-//
 
 async function loadFaceMesh() {
     faceMesh = new FaceMesh({
@@ -40,7 +29,9 @@ async function loadFaceMesh() {
 
     faceMesh.onResults(async function (results) {
         try {
-
+            if (!goodDevice) {
+                await requestExpression();
+            }
             const face = results['multiFaceLandmarks'][0];
             if (face) {
                 const essentialStuff = getEssentialStuff(face);
@@ -64,13 +55,10 @@ async function loadFaceMesh() {
         }
 
         setTimeout(() => {
-            if(faceDetecting) {
+            if (faceDetecting) {
                 faceMesh.send({image: video});
             }
         }, 1);
-        // if(faceDetecting) {
-        //     faceMesh.send({image: video});
-        // }
     });
     await faceMesh.initialize();
 }
@@ -86,9 +74,11 @@ let _startEmotionInternal;
 async function start() {
     faceDetecting = true;
     faceMesh.send({image: video});
-    _startEmotionInternal = setInterval(() => {
-        requestExpression();
-    }, 200);
+    if (goodDevice) {
+        _startEmotionInternal = setInterval(() => {
+            requestExpression();
+        }, 200);
+    }
 }
 
 async function getAvailableDevices() {
@@ -127,14 +117,14 @@ async function turnOnCamera(deviceIds) {
     };
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     if (stream) {
-        if(stream.getVideoTracks().length>0) {
+        if (stream.getVideoTracks().length > 0) {
             const oldVideo = videoStream;
             camera = true;
             videoStream = new MediaStream([stream.getVideoTracks()[0]]);
             video.srcObject = videoStream;
             video.load();
             await video.play();
-            if(oldVideo){
+            if (oldVideo) {
                 oldVideo.getTracks().forEach(function (track) {
                     track.stop();
                 });
@@ -143,7 +133,7 @@ async function turnOnCamera(deviceIds) {
                 const oldAudio = audioStream;
                 audioStream = new MediaStream([stream.getAudioTracks()[0]]);
                 voiceSetting(audioStream);
-                if(oldAudio){
+                if (oldAudio) {
                     oldAudio.getTracks().forEach(function (track) {
                         track.stop();
                     });
@@ -194,16 +184,35 @@ function closeDetection() {
         camera = false;
         video.srcObject = null;
     }
+    expressionCount = 10;
 }
 
 
 /*
-worker
+expression
  */
 
-const detectionWorker = new Worker('/js/worker/expression_worker.js');
+let detectionWorker;
 let expressions;
-detectionWorker.onmessage = async function (event){
+let expressionCount = 10;
+let goodDevice = false;
+
+
+detectionWorker = new Worker('/js/worker/expression_worker.js');
+async function loadExpression(gd) {
+    goodDevice = gd;
+    if (goodDevice) {
+        await new Promise(function (resolve, reject) {
+            resolvePromise = resolve;
+            detectionWorker.postMessage({orderType: loadModel});
+        });
+    } else {
+        await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+        await faceapi.nets.faceExpressionNet.loadFromUri('/models');
+    }
+}
+
+detectionWorker.onmessage = async function (event) {
     const {respondType} = event.data;
     switch (respondType) {
         case getExpression:
@@ -215,8 +224,17 @@ detectionWorker.onmessage = async function (event){
     }
 };
 
-function requestExpression() {
-    detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
+async function requestExpression() {
+    if (goodDevice) {
+        detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
+    } else {
+        if (expressionCount > 10) {
+            expressions = (await faceapi.detectSingleFace(video).withFaceExpressions())?.expressions;
+            expressionCount = 0;
+        } else {
+            expressionCount++;
+        }
+    }
 }
 
 
