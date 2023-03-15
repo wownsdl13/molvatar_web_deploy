@@ -33113,7 +33113,8 @@ n=B.b.cs(m,a[o])
 if(o<a.length-1)B.b.eS(m,n+1,b)}return m},
 X2(a){var s=$.bi_()
 if(s.a8(0,a))return s.h(0,a)
-return a.toLowerCase()},
+if(a.length===1)return a.toLowerCase()
+return a},
 m1(a){switch(a){case"/":return 0
 case"/avatar":case"/avatar/edit":return 1
 case"/gallery":return 2
