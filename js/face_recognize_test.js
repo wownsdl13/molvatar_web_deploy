@@ -1,3 +1,7 @@
+import * as facemesh from '@tensorflow-models/facemesh';
+import * as tf from '@tensorflow/tfjs-core';
+import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
+
 const video = document.createElement('video');
 video.width = 400;
 video.height = 300;
@@ -11,6 +15,7 @@ let audioStream;
 
 
 let faceMesh;
+let faceMeshModel;
 
 let resolvePromise;
 
@@ -29,6 +34,9 @@ async function loadFaceMesh() {
 
     faceMesh.onResults(async function (results) {
         try {
+            // if (!goodDevice) {
+            //     await requestExpression();
+            // }
             const face = results['multiFaceLandmarks'][0];
             if (face) {
                 const essentialStuff = getEssentialStuff(face);
@@ -49,24 +57,14 @@ async function loadFaceMesh() {
             }
         } catch (err) {
             console.log('error h > ' + err);
-            if(!goodDevice){
-                detectionCallback(JSON.stringify({}));
+        }
+        requestAnimationFrame(() => {
+            if (faceDetecting) {
+                faceMesh.send({image: video});
             }
-        }
-        if(goodDevice) {
-            requestAnimationFrame(() => {
-                if (faceDetecting) {
-                    faceMesh.send({image: video});
-                }
-            });
-        }
+        });
     });
-}
-
-async function callNextFrame(){
-    if(faceDetecting){
-        setTimeout(() => faceMesh.send({image: video}), 1000/60);
-    }
+    faceMeshModel = await faceMesh.load();
 }
 
 
@@ -80,11 +78,15 @@ let _startEmotionInternal;
 async function start() {
     faceDetecting = true;
     faceMesh.send({image: video});
-    if (goodDevice) {
+    if(goodDevice) {
         _startEmotionInternal = setInterval(() => {
             requestExpression();
         }, 200);
     }
+}
+
+async function _detecting() {
+    await faceMeshModel.estimateFaces(video);
 }
 
 
@@ -210,7 +212,7 @@ detectionWorker = new Worker('/js/worker/expression_worker.js');
 async function loadExpression(gd) {
     goodDevice = gd;
 
-    if (goodDevice) {
+    if(goodDevice) {
         await new Promise(function (resolve, reject) {
             resolvePromise = resolve;
             detectionWorker.postMessage({orderType: loadModel});
@@ -240,7 +242,7 @@ detectionWorker.onmessage = async function (event) {
 };
 
 async function requestExpression() {
-    if (goodDevice) {
+    if(goodDevice) {
         detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
     }
     // if (goodDevice) {
