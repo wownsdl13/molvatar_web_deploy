@@ -29,9 +29,9 @@ async function loadFaceMesh() {
 
     faceMesh.onResults(async function (results) {
         try {
-            if (!goodDevice) {
-                await requestExpression();
-            }
+            // if (!goodDevice) {
+            //     await requestExpression();
+            // }
             const face = results['multiFaceLandmarks'][0];
             if (face) {
                 const essentialStuff = getEssentialStuff(face);
@@ -73,11 +73,9 @@ let _startEmotionInternal;
 async function start() {
     faceDetecting = true;
     faceMesh.send({image: video});
-    if (goodDevice) {
-        _startEmotionInternal = setInterval(() => {
-            requestExpression();
-        }, 200);
-    }
+    _startEmotionInternal = setInterval(() => {
+        requestExpression();
+    }, goodDevice?200:500);
 }
 
 async function getAvailableDevices() {
@@ -194,21 +192,27 @@ expression
 let detectionWorker;
 let expressions;
 let expressionCount = 10;
-let goodDevice = false;
+let goodDevice;
 
 
 detectionWorker = new Worker('/js/worker/expression_worker.js');
+
 async function loadExpression(gd) {
     goodDevice = gd;
-    if (goodDevice) {
-        await new Promise(function (resolve, reject) {
-            resolvePromise = resolve;
-            detectionWorker.postMessage({orderType: loadModel});
-        });
-    } else {
-        await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
-        await faceapi.nets.faceExpressionNet.loadFromUri('/models');
-    }
+
+    await new Promise(function (resolve, reject) {
+        resolvePromise = resolve;
+        detectionWorker.postMessage({orderType: loadModel});
+    });
+    // if (goodDevice) {
+    //     await new Promise(function (resolve, reject) {
+    //         resolvePromise = resolve;
+    //         detectionWorker.postMessage({orderType: loadModel});
+    //     });
+    // } else {
+    //     await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+    //     await faceapi.nets.faceExpressionNet.loadFromUri('/models');
+    // }
 }
 
 detectionWorker.onmessage = async function (event) {
@@ -224,16 +228,24 @@ detectionWorker.onmessage = async function (event) {
 };
 
 async function requestExpression() {
-    if (goodDevice) {
-        detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
-    } else {
-        if (expressionCount > 10) {
-            expressions = (await faceapi.detectSingleFace(video).withFaceExpressions())?.expressions;
-            expressionCount = 0;
-        } else {
-            expressionCount++;
-        }
-    }
+    detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
+    // if (goodDevice) {
+    //     detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
+    // } else {
+    //     if (expressionCount > 10) {
+    //         await new Promise((resolve, reject) => {
+    //             requestAnimationFrame(() => {
+    //                 if (faceDetecting) {
+    //                     faceMesh.send({image: video});
+    //                 }
+    //             });
+    //         });
+    //         expressions = (await faceapi.detectSingleFace(video).withFaceExpressions())?.expressions;
+    //         expressionCount = 0;
+    //     } else {
+    //         expressionCount++;
+    //     }
+    // }
 }
 
 
