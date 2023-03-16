@@ -73,9 +73,11 @@ let _startEmotionInternal;
 async function start() {
     faceDetecting = true;
     faceMesh.send({image: video});
-    _startEmotionInternal = setInterval(() => {
-        requestExpression();
-    }, goodDevice?200:500);
+    if(goodDevice) {
+        _startEmotionInternal = setInterval(() => {
+            requestExpression();
+        }, 200);
+    }
 }
 
 async function getAvailableDevices() {
