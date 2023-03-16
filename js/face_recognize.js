@@ -200,10 +200,12 @@ detectionWorker = new Worker('/js/worker/expression_worker.js');
 async function loadExpression(gd) {
     goodDevice = gd;
 
-    await new Promise(function (resolve, reject) {
-        resolvePromise = resolve;
-        detectionWorker.postMessage({orderType: loadModel});
-    });
+    if(goodDevice) {
+        await new Promise(function (resolve, reject) {
+            resolvePromise = resolve;
+            detectionWorker.postMessage({orderType: loadModel});
+        });
+    }
     // if (goodDevice) {
     //     await new Promise(function (resolve, reject) {
     //         resolvePromise = resolve;
@@ -228,7 +230,9 @@ detectionWorker.onmessage = async function (event) {
 };
 
 async function requestExpression() {
-    detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
+    if(goodDevice) {
+        detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
+    }
     // if (goodDevice) {
     //     detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
     // } else {
