@@ -53,11 +53,11 @@ async function loadFaceMesh() {
         } catch (err) {
             console.log('error h > ' + err);
         }
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             if (faceDetecting) {
                 faceMesh.send({image: video});
             }
-        }, 1);
+        });
     });
     await faceMesh.initialize();
 }
