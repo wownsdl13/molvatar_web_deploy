@@ -53,7 +53,6 @@ async function loadFaceMesh() {
         } catch (err) {
             console.log('error h > ' + err);
         }
-
         setTimeout(() => {
             if (faceDetecting) {
                 faceMesh.send({image: video});
