@@ -10,62 +10,42 @@ let videoStream;
 let audioStream;
 
 
-let faceMesh;
+let detector;
 
 let resolvePromise;
 
 async function loadFaceMesh() {
-    faceMesh = new FaceMesh({
-        locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-        }
-    });
-    faceMesh.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
-    });
-
-    faceMesh.onResults(async function (results) {
-        try {
-            const face = results['multiFaceLandmarks'][0];
-            if (face) {
-                const essentialStuff = getEssentialStuff(face);
-                detectionCallback(JSON.stringify({
-                    'expressions': expressions,
-                    'face': {
-                        // landmarks: essentialStuff.faceLandmarks,
-                        ratio: essentialStuff.ratio,
-                        scale: essentialStuff.scale,
-                        leftEyeOpen: essentialStuff.leftEyeOpen,
-                        rightEyeOpen: essentialStuff.rightEyeOpen,
-                        mouthOpen: essentialStuff.mouthOpen,
-                        center: essentialStuff.center
-                    },
-                    'angle': calculateFaceAngle(face),
-                    'volume': volumeFunction(),
-                }));
-            }
-        } catch (err) {
-            console.log('error h > ' + err);
-            if(!goodDevice){
-                detectionCallback(JSON.stringify({}));
-            }
-        }
-        if(goodDevice) {
-            requestAnimationFrame(() => {
-                if (faceDetecting) {
-                    faceMesh.send({image: video});
-                }
-            });
-        }
-    });
+    const model = faceLandmarksDetection.SupportedModels.MediaPipeFaceMesh;
+    const detectorConfig = {
+        runtime: 'mediapipe',
+        solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh',
+    }
+    detector = await faceLandmarksDetection.createDetector(model, detectorConfig);
 }
 
-async function callNextFrame(){
-    if(faceDetecting){
-        setTimeout(() => faceMesh.send({image: video}), 1000/40);
+async function _faceDetect() {
+    const faces = await detector.estimateFaces(video, {});
+    if (faces.length > 0) {
+        const face = faces[0].keypoints;
+        const box = faces[0].box;
+        const essentialStuff = getEssentialStuff(face,box);
+        detectionCallback(JSON.stringify({
+            'expressions': expressions,
+            'face': {
+                landmarks: essentialStuff.faceLandmarks,
+                ratio: essentialStuff.ratio,
+                scale: essentialStuff.scale,
+                leftEyeOpen: essentialStuff.leftEyeOpen,
+                rightEyeOpen: essentialStuff.rightEyeOpen,
+                mouthOpen: essentialStuff.mouthOpen,
+                center: essentialStuff.center
+            },
+            'angle': calculateFaceAngle(face),
+            'volume': volumeFunction(),
+        }));
+    }
+    if (faceDetecting) {
+        requestAnimationFrame(_faceDetect);
     }
 }
 
@@ -79,12 +59,10 @@ let _startEmotionInternal;
 
 async function start() {
     faceDetecting = true;
-    faceMesh.send({image: video});
-    if (goodDevice) {
-        _startEmotionInternal = setInterval(() => {
-            requestExpression();
-        }, 200);
-    }
+    _faceDetect().then();
+    _startEmotionInternal = setInterval(() => {
+        requestExpression();
+    }, 200);
 }
 
 
@@ -99,8 +77,7 @@ async function getAvailableDevices() {
     // console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
 }
 
-async function getDevicePermission(gd) {
-    goodDevice = gd;
+async function getDevicePermission() {
     const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true
@@ -121,8 +98,9 @@ async function getDevicePermission(gd) {
 async function turnOnCamera(deviceIds) {
     const constraints = {
         video: {
-            width: { ideal: 400 }, height: { ideal: 300 },
-            deviceId: deviceIds[0] ? {exact: deviceIds[0]} : undefined},
+            width: {ideal: 400}, height: {ideal: 300},
+            deviceId: deviceIds[0] ? {exact: deviceIds[0]} : undefined
+        },
         audio: {deviceId: deviceIds[1] ? {exact: deviceIds[1]} : undefined}
     };
 
@@ -206,27 +184,14 @@ expression
 let detectionWorker;
 let expressions;
 let expressionCount = 10;
-let goodDevice;
-
 
 detectionWorker = new Worker('/js/worker/expression_worker.js');
 
 async function loadExpression() {
-    if (goodDevice) {
-        await new Promise(function (resolve, reject) {
-            resolvePromise = resolve;
-            detectionWorker.postMessage({orderType: loadModel});
-        });
-    }
-    // if (goodDevice) {
-    //     await new Promise(function (resolve, reject) {
-    //         resolvePromise = resolve;
-    //         detectionWorker.postMessage({orderType: loadModel});
-    //     });
-    // } else {
-    //     await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
-    //     await faceapi.nets.faceExpressionNet.loadFromUri('/models');
-    // }
+    await new Promise(function (resolve, reject) {
+        resolvePromise = resolve;
+        detectionWorker.postMessage({orderType: loadModel});
+    });
 }
 
 detectionWorker.onmessage = async function (event) {
@@ -242,26 +207,7 @@ detectionWorker.onmessage = async function (event) {
 };
 
 async function requestExpression() {
-    if (goodDevice) {
-        detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
-    }
-    // if (goodDevice) {
-    //     detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
-    // } else {
-    //     if (expressionCount > 10) {
-    //         await new Promise((resolve, reject) => {
-    //             requestAnimationFrame(() => {
-    //                 if (faceDetecting) {
-    //                     faceMesh.send({image: video});
-    //                 }
-    //             });
-    //         });
-    //         expressions = (await faceapi.detectSingleFace(video).withFaceExpressions())?.expressions;
-    //         expressionCount = 0;
-    //     } else {
-    //         expressionCount++;
-    //     }
-    // }
+    detectionWorker.postMessage({orderType: requestExp, data: getCaptureFrame()});
 }
 
 

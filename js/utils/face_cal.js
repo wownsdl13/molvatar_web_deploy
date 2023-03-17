@@ -119,28 +119,29 @@ function calculateFaceAngle(landmarks){
     return rotationMatrixToEulerAngle(matrix);
 }
 
-function getEssentialStuff(landmarks){
-    const getRect = (landmarks) => {
-        let minX = 100000, maxX = -100000;
-        let minY = 100000, maxY = -100000;
-        for (const o of landmarks) {
-            const x = o['x'];
-            const y = o['y'];
-            if (x > maxX) {
-                maxX = x;
-            } else if (x < minX) {
-                minX = x;
-            }
-            if (y > maxY) {
-                maxY = y;
-            } else if (y < minY) {
-                minY = y;
-            }
-        }
-        return {topLeft : [minX, minY], width:maxX - minX, height:maxY - minY};
-    }
+function getEssentialStuff(landmarks,box){
+    // const getRect = (landmarks) => {
+    //     let minX = 100000, maxX = -100000;
+    //     let minY = 100000, maxY = -100000;
+    //     for (const o of landmarks) {
+    //         const x = o['x'];
+    //         const y = o['y'];
+    //         if (x > maxX) {
+    //             maxX = x;
+    //         } else if (x < minX) {
+    //             minX = x;
+    //         }
+    //         if (y > maxY) {
+    //             maxY = y;
+    //         } else if (y < minY) {
+    //             minY = y;
+    //         }
+    //     }
+    //     return {topLeft : [minX, minY], width:maxX - minX, height:maxY - minY};
+    // }
+    //
+    // const rect = getRect(landmarks);
 
-    const rect = getRect(landmarks);
 
     //scale
     let scale = -10;
@@ -152,13 +153,18 @@ function getEssentialStuff(landmarks){
             scale = zValue;
         }
 
-        const width = (o['x'] - rect.topLeft[0]);
-        const height = (o['y'] - rect.topLeft[1]);
+        // const width = (o['x'] - rect.topLeft[0]);
+        // const height = (o['y'] - rect.topLeft[1]);
+        // faceLandmarks.push({
+        //     x:width / rect.width * 100,
+        //     y:height / rect.height * 100,
+        //     z:zValue,
+        // });
+
         faceLandmarks.push({
-            x:width / rect.width * 100,
-            y:height / rect.height * 100,
+            x:(o['x'] - box.xMin) / box.width * 100,
+            y:(o['y'] - box.yMin) /  box.height * 100,
             z:zValue,
-            why:1
         });
     }
 
@@ -183,7 +189,7 @@ function getEssentialStuff(landmarks){
     return {
         faceLandmarks:faceLandmarks,
         scale:scale,
-        ratio:rect.width/rect.height,
+        ratio:box.width/box.height,
         leftEyeOpen:leftEyeOpen,
         rightEyeOpen:rightEyeOpen,
         mouthOpen:mouthOpen,

@@ -10,8 +10,22 @@
   <script src="js/worker/worker_order.js"></script>
 <!--  <script src="js/worker/worker_order.js"></script>-->
 
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+<!--  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>-->
 
+
+  <!-- Require the peer dependencies of facemesh. -->
+<!--  <script src="https://unpkg.com/@tensorflow-models/face-landmarks-detection@1.0.2/dist/face-landmarks-detection.js"></script>-->
+<!--  <script src="https://unpkg.com/@tensorflow/tfjs-core@4.2.0/dist/tf-core.js"></script>-->
+<!--  <script src="https://unpkg.com/@tensorflow/tfjs-converter@4.2.0/dist/tf-converter.js"></script>-->
+<!--  <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@4.2.0/dist/tf-backend-webgl.js"></script>-->
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+
+  <!-- You must explicitly require a TF.js backend if you're not using the TF.js union bundle. -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection"></script>
 
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -53,7 +67,7 @@
        application. For more information, see:
        https://developers.google.com/web/fundamentals/primers/service-workers -->
   <script>
-    var serviceWorkerVersion = '248543487';
+    var serviceWorkerVersion = '2147164766';
     var scriptLoaded = false;
     function loadMainDartJs() {
       if (scriptLoaded) {

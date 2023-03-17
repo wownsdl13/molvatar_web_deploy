@@ -1,7 +1,3 @@
-import * as facemesh from '@tensorflow-models/facemesh';
-import * as tf from '@tensorflow/tfjs-core';
-import * as tfjsWasm from '@tensorflow/tfjs-backend-wasm';
-
 const video = document.createElement('video');
 video.width = 400;
 video.height = 300;
