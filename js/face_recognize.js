@@ -99,7 +99,8 @@ async function getAvailableDevices() {
     // console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
 }
 
-async function getDevicePermission() {
+async function getDevicePermission(gd) {
+    goodDevice = gd;
     const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true
@@ -118,10 +119,18 @@ async function getDevicePermission() {
 }
 
 async function turnOnCamera(deviceIds) {
-    const constraints = {
-        video: {deviceId: deviceIds[0] ? {exact: deviceIds[0]} : undefined},
-        audio: {deviceId: deviceIds[1] ? {exact: deviceIds[1]} : undefined}
-    };
+    let constraints;
+    if(goodDevice){
+        constraints = {
+            video: {
+                width: { ideal: 400 }, height: { ideal: 300 },
+                deviceId: deviceIds[0] ? {exact: deviceIds[0]} : undefined},
+            audio: {deviceId: deviceIds[1] ? {exact: deviceIds[1]} : undefined}
+        };
+    }else{
+        constraints = { audio: true, video: { facingMode: "user" } };
+    }
+
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     if (stream) {
         if (stream.getVideoTracks().length > 0) {
@@ -207,9 +216,7 @@ let goodDevice;
 
 detectionWorker = new Worker('/js/worker/expression_worker.js');
 
-async function loadExpression(gd) {
-    goodDevice = gd;
-
+async function loadExpression() {
     if (goodDevice) {
         await new Promise(function (resolve, reject) {
             resolvePromise = resolve;
