@@ -25,11 +25,12 @@ async function loadFaceMesh() {
 
 async function _faceDetect() {
     const faces = await detector.estimateFaces(video, {});
+    let data = JSON.stringify({});
     if (faces.length > 0) {
         const face = faces[0].keypoints;
         const box = faces[0].box;
         const essentialStuff = getEssentialStuff(face,box);
-        detectionCallback(JSON.stringify({
+        data = JSON.stringify({
             'expressions': expressions,
             'face': {
                 landmarks: essentialStuff.faceLandmarks,
@@ -42,8 +43,9 @@ async function _faceDetect() {
             },
             'angle': calculateFaceAngle(face),
             'volume': volumeFunction(),
-        }));
+        });
     }
+    detectionCallback(data);
 }
 
 
