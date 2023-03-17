@@ -56,12 +56,14 @@ Request
 let faceDetecting = false;
 let _startEmotionInternal;
 
-async function start(isMobileWeb) {
+async function start(isMobileWeb, detectEmotion) {
     faceDetecting = true;
     _faceDetect().then();
-    _startEmotionInternal = setInterval(() => {
-        requestExpression();
-    }, isMobileWeb?500:200);
+    if(detectEmotion) {
+        _startEmotionInternal = setInterval(() => {
+            requestExpression();
+        }, isMobileWeb ? 500 : 200);
+    }
 }
 
 function requestNextFrame(){
