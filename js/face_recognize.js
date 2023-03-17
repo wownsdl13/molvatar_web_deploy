@@ -119,17 +119,12 @@ async function getDevicePermission(gd) {
 }
 
 async function turnOnCamera(deviceIds) {
-    let constraints;
-    if(goodDevice){
-        constraints = {
-            video: {
-                width: { ideal: 400 }, height: { ideal: 300 },
-                deviceId: deviceIds[0] ? {exact: deviceIds[0]} : undefined},
-            audio: {deviceId: deviceIds[1] ? {exact: deviceIds[1]} : undefined}
-        };
-    }else{
-        constraints = { audio: true, video: { facingMode: "user" } };
-    }
+    const constraints = {
+        video: {
+            width: { ideal: 400 }, height: { ideal: 300 },
+            deviceId: deviceIds[0] ? {exact: deviceIds[0]} : undefined},
+        audio: {deviceId: deviceIds[1] ? {exact: deviceIds[1]} : undefined}
+    };
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     if (stream) {
