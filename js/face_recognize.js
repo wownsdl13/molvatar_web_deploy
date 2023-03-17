@@ -65,7 +65,7 @@ async function loadFaceMesh() {
 
 async function callNextFrame(){
     if(faceDetecting){
-        setTimeout(() => faceMesh.send({image: video}), 1000/60);
+        setTimeout(() => faceMesh.send({image: video}), 1000/40);
     }
 }
 
