@@ -44,9 +44,6 @@ async function _faceDetect() {
             'volume': volumeFunction(),
         }));
     }
-    if (faceDetecting) {
-        requestAnimationFrame(_faceDetect);
-    }
 }
 
 
@@ -64,6 +61,12 @@ async function start(isMobileWeb) {
         _startEmotionInternal = setInterval(() => {
             requestExpression();
         }, 200);
+    }
+}
+
+function requestNextFrame(){
+    if (faceDetecting) {
+        requestAnimationFrame(_faceDetect);
     }
 }
 
