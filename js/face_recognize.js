@@ -59,11 +59,9 @@ let _startEmotionInternal;
 async function start(isMobileWeb) {
     faceDetecting = true;
     _faceDetect().then();
-    if(!isMobileWeb) { //mobileWeb 이 아니면
-        _startEmotionInternal = setInterval(() => {
-            requestExpression();
-        }, 200);
-    }
+    _startEmotionInternal = setInterval(() => {
+        requestExpression();
+    }, isMobileWeb?500:200);
 }
 
 function requestNextFrame(){
