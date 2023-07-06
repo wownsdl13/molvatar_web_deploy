@@ -2,11 +2,11 @@
 const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
-const RESOURCES = {
-  "version.json": "05de9744eca75aec08d5eb301df560e5",
+
+const RESOURCES = {"version.json": "05de9744eca75aec08d5eb301df560e5",
 "favicon.ico": "de3b0521d50ceaa79a1c50cc796174b9",
-"index.html": "a101584b4e7120ad4525528964d3d90f",
-"/": "a101584b4e7120ad4525528964d3d90f",
+"index.html": "38b3192c47982ff7410828a87cd2600a",
+"/": "38b3192c47982ff7410828a87cd2600a",
 "js/face_recognize_test.js": "3728692da7fd0312298c80d15baf74a6",
 "js/face_recognize.js": "bde4a9763003c95d24bd7a729d693b24",
 "js/utils/face_cal.js": "0456ff5b0c28b4573e4bbd09862ebd64",
@@ -15,9 +15,9 @@ const RESOURCES = {
 "js/worker/worker_order.js": "210e6de65f105c8f13de385ec39469bd",
 "js/worker/expression_worker.js": "eec953b560b20cb16efec9031f7c16d1",
 "js/worker/face_env_worker_patch.js": "e7bcdbac652b3fcd7111eddda52fc3c6",
-"main.dart.js": "42dbee52730b2450b341a9714e1db76b",
-"404.html": "5654a7ca44affae70463c3923b90b630",
-"flutter.js": "a85fcf6324d3c4d3ae3be1ae4931e9c5",
+"main.dart.js": "d9fb55a4f2272616213040384893bbc7",
+"404.html": "a101584b4e7120ad4525528964d3d90f",
+"flutter.js": "6fef97aeca90b426343ba6c5c9dc5d4a",
 "models/face_landmark_68_tiny_model-shard1": "47047fee26557b55d985952bdfc6cba1",
 "models/ssd_mobilenetv1_model-shard1": "37ef238973ea93daac91f1914478c40b",
 "models/face_expression_model-weights_manifest.json": "e5a3cf2829ccd7f8dce77062d7ff06db",
@@ -65,6 +65,8 @@ const RESOURCES = {
 ".git/objects/6a/59ab5923b00791f646968854a9e6a7cd7fcf00": "cf51e9366c2027b02ba1f5346708f12b",
 ".git/objects/6a/562868741911ffc3a5345f3c094a71eb0d073d": "ad3237b80e6dc65be0e2000c6c0a445f",
 ".git/objects/32/44c27f863ac695452e1c75bf7c1892cf2225be": "cc7deff0dccb1ded7317aff78b2233e3",
+".git/objects/3d/2c818e0d8c4b497abf078d9e4150df34b9b877": "f987712337da0dbcaa63bc73a9e3f138",
+".git/objects/3d/5e4552d2194e482a13eacf16894412bc6d53a3": "b85e2dc3291e70eb4ea4eec0a4ed5512",
 ".git/objects/3d/053b8e37be7bb5a2224b6ea3e578028629a690": "06367fc702f1001ea2515090b9c50251",
 ".git/objects/3d/bf6de96f9d5a7104af76ddbc6d94b38bc5055d": "a15eba16362b54e80a4535d84d9192a6",
 ".git/objects/0e/7eaf986d78f9af4460aeb1605b556dbb803df2": "4eb16d17ad2d57ec36dee11759884984",
@@ -85,10 +87,12 @@ const RESOURCES = {
 ".git/objects/02/0fca6ed2a7e7d4e896d12e221c779a8be0a7e3": "fc55993c048e7d77901df9c00a2ee4da",
 ".git/objects/02/7f762ffd29ff64053ea8f65e53ca8cd0697221": "5a36a7552f5a92937a0855296d703f76",
 ".git/objects/a4/f6460ed242c226d40274f71a5d3853a2d2a52d": "a0ada0daa3ce5e940c439ec9a7e3346c",
+".git/objects/a4/2ce31eaceb0655e1b5efc1e3d4d343fb788de9": "8451790c3179bbbb3df6a9821de3fecd",
 ".git/objects/a4/ef7f4fea8c59577c3a707b4fa61ac0695ccca5": "baef21d9179caf12cfcec5535fa09599",
 ".git/objects/a3/d98a96034a530754892b5e8fc3374e8115ff20": "b4889f83f7c669dd087ac3c39a499654",
 ".git/objects/b5/20d01843427a1a48518d9d2058c61476a97c6b": "665941f156245a2e476758f7e8bdd73d",
 ".git/objects/b5/5c778ca4315c5bb3f49bda3e610a946243c71f": "c4f377cc985448c1c8076db4303c9ca2",
+".git/objects/b5/42944d67b4f7e64d0b87565f1e934632a791c2": "56627ce3bed74e5c0301182219d4e8e1",
 ".git/objects/b2/cde2ec8d257ed95428d688665a606e81922e4f": "0ebeb573e665abd83f1d567f304bcc45",
 ".git/objects/d9/4ac92d7a2f3b149c4e42a8a1674b649da58d40": "25a5c4f3f6d93ceb0b6c306a07ad8723",
 ".git/objects/d9/b315c26ef57266f5bf972750ae2a21ae74dfb2": "3b0ad7e3695f7fa2b6ff157a79c7043b",
@@ -140,6 +144,7 @@ const RESOURCES = {
 ".git/objects/e4/137d377cb1c068e9f0e1a26e4ce2429cb2b31c": "655edf87d259f885e6ae41ff90b27e63",
 ".git/objects/e4/5bece1e8d680fc6705558d97c6b91a995d88d3": "bfee5b06e0b40a4f636624eb4c558eed",
 ".git/objects/e4/9659c60047e2438ca6592d55c0dfd3ff575741": "72cdfcee226afc2c5d4a59d0565cd72d",
+".git/objects/fe/3de7e9004d5d052795cb6b5e08a53efec6db26": "0897990c87dac0f39bce9c727c9af6e6",
 ".git/objects/fb/57db0489b6023002841685147cc0c52ad74376": "4f3c76f937cd89abd63aaacf598c201e",
 ".git/objects/fb/d69aea7db8e2189e1961e32e6becd033d50a8a": "9bfb494dd57e514c095b0777c76f22ff",
 ".git/objects/fb/e0e160f591c3b47e818591ce9a232e3e000297": "d3b665692ba23526433c6cdd503ef508",
@@ -170,11 +175,13 @@ const RESOURCES = {
 ".git/objects/87/d54a092af889db4c6132a0ee4ba95ec658124d": "c8a8ff9a6441e62703a616ad5d2daaec",
 ".git/objects/74/95c7951897099bed53dea91d5653f4f30a0687": "101270f28e001648e7f69293d933abd7",
 ".git/objects/74/883c8b088350a10932d414976a8870c2cbe93a": "f6da6b0730f1fbef174b07e9e6d9e306",
+".git/objects/28/a307920e395e064b7a061b136aabca74f5863c": "2029199d45774eafe74fcb1fa6cd6e65",
 ".git/objects/28/71daefcba6a8953f3f70e0ded091cfe75b154e": "b91d3690ec84ca60cf48522642f14825",
 ".git/objects/28/27539fe6316a21f1e00e4fd4ecffceb5bd4433": "10eac7d49e13b23d5a4c441cac241136",
 ".git/objects/17/6fd0b5d4e31da156411d942cfb99dd85b4337a": "231f9f45934357b8f83bbe62ab3739b3",
 ".git/objects/17/ad7ec95c7eb3ea5b89426b6d2848e5bc5b595d": "f3cfe3b0e428c74a276642b85acf8d7e",
 ".git/objects/17/427f9f456972e3619e6cae6f950029ee5bbac2": "ba81156fba71cfb7d47ba29d82e45e5f",
+".git/objects/7b/bef05fd3eca6438834a9b3b657a5e01b09c712": "2c50c59884342dd5960aa627c0d0738d",
 ".git/objects/7b/2bb4a6095ebca33eabf74a24ed3fb0dcec7d9c": "def0266dfdb921771c22eacf82a4d2cd",
 ".git/objects/8a/a25fef6bf60c46f5ad225ff2cd3379b0ddf6bd": "40a1b985fad69c0a52705f2d394f5341",
 ".git/objects/7e/96b610859e9c275e214f87329c8980dd089ec1": "42e975347c4f56fbd93711976d017f20",
@@ -232,6 +239,7 @@ const RESOURCES = {
 ".git/objects/01/3418d9996e4f4d5c86d026cef6f5dc78a7cedd": "d9081a3e70e9299d3c21666179492412",
 ".git/objects/06/612fc987e4907255db08708fb8a1e578118bf7": "73658d5e7ed6a1133a58ec7ca1b8d1e3",
 ".git/objects/6c/314539ec25df67884f21fd318b8535fbfc67c4": "de1a794e03a5d2ff773bd9dd48538cb4",
+".git/objects/6c/2a58560ccb8c61527167a37fa4e57cbc6804b2": "04b0625ea85c2d4a67117884e0ee17ba",
 ".git/objects/39/b1a468a39f9f9e3d5081a8fdf80daf20d887a6": "4a13b4ffc5eef4752e67cd4881e013fe",
 ".git/objects/99/cd084e9a7d500c6ec53f066e20a3eec9a5bfb9": "1a1101ec9808a1a3eb1b71e8e420c85c",
 ".git/objects/52/d948e1af4b55d7c2ec9337eb6897866dbc7300": "d159364624e4fae9eadaaeb417ebc115",
@@ -361,9 +369,9 @@ const RESOURCES = {
 ".git/objects/25/790a8481fb39fcc3fc565bcc5c7e64dd8bc609": "2fd4b217563e3a6e1c60d163456290aa",
 ".git/HEAD": "cf7dd3ce51958c5f13fece957cc417fb",
 ".git/info/exclude": "036208b4a1ab4a235d75c181e685e5a3",
-".git/logs/HEAD": "0369c3de7a97bf1e785b7219c0333ee9",
-".git/logs/refs/heads/main": "0369c3de7a97bf1e785b7219c0333ee9",
-".git/logs/refs/remotes/origin/main": "9e52bd63aa736e737cb5eedb57177668",
+".git/logs/HEAD": "c074958aac9c78772f2e7e0b4a7bc1a3",
+".git/logs/refs/heads/main": "c074958aac9c78772f2e7e0b4a7bc1a3",
+".git/logs/refs/remotes/origin/main": "3d61ddc06a1bc2bd9ee2ffd448dae4ca",
 ".git/description": "a0a7c3fff21f2aea3cfa1d0316dd816c",
 ".git/hooks/commit-msg.sample": "579a3c1e12a1e74a98169175fb913012",
 ".git/hooks/pre-rebase.sample": "56e45f2bcbc8226d2b4200f7c46371bf",
@@ -378,17 +386,19 @@ const RESOURCES = {
 ".git/hooks/pre-push.sample": "2c642152299a94e05ea26eae11993b13",
 ".git/hooks/update.sample": "647ae13c682f7827c22f5fc08a03674e",
 ".git/hooks/push-to-checkout.sample": "c7ab00c7784efeadad3ae9b228d4b4db",
-".git/refs/heads/main": "3f25cc4cafebcafedc8eabda8b211c8f",
-".git/refs/remotes/origin/main": "3f25cc4cafebcafedc8eabda8b211c8f",
-".git/index": "2e53aa4582b0c703ef1fc8efc58ee9c9",
+".git/refs/heads/main": "f0b7cc1b7c889cee11736974f991cdde",
+".git/refs/remotes/origin/main": "f0b7cc1b7c889cee11736974f991cdde",
+".git/index": "f6d19ebc8985d0241fcfdf682123a883",
 ".git/COMMIT_EDITMSG": "45c9eb7fa6e6a781268f8a3b8d62d8b9",
 "assets/AssetManifest.json": "31e9b87228145d1d9aa52b766774e0f0",
-"assets/NOTICES": "f769864bad40d4801fb5f8e9af2c913b",
+"assets/NOTICES": "ed643adfeb86160ce2b3b3135e5be643",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
-"assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "6d342eb68f170c97609e9da345464e5e",
+"assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "57d849d738900cfd590e9adc7e208250",
 "assets/packages/pixel_color_picker/assets/images/picker.png": "3e71419f9c5b13c01e2714aba9c22172",
 "assets/packages/wakelock_web/assets/no_sleep.js": "7748a45cd593f33280669b29c2c8919a",
-"assets/fonts/MaterialIcons-Regular.otf": "e7069dfd19b331be16bed984668fe080",
+"assets/shaders/ink_sparkle.frag": "f8b80e740d33eb157090be4e995febdf",
+"assets/AssetManifest.bin": "fc50d4a98dd71bdd8bc1b961fe9ad1a8",
+"assets/fonts/MaterialIcons-Regular.otf": "222d966fa6da1a2688bae971a4aef82c",
 "assets/assets/instructions/mac_4.png": "68f981ea6b6ad1dd42327664da27adba",
 "assets/assets/instructions/mac_2.png": "6840ece7e9f013491d9b851325bf4dd1",
 "assets/assets/instructions/mac_3.png": "da82db28a2b108775d7ab4cbaaddaa5f",
@@ -457,19 +467,22 @@ const RESOURCES = {
 "assets/assets/downloads/MolvatarDetector%20Setup.exe": "c93a8aa3918c0c00c890a914e0f6e21a",
 "assets/assets/raw/terms_of_services.txt": "e3d6024f128273b3f1ccaad7e1cf530f",
 "assets/assets/raw/account_license.txt": "d5354ad76fe131bf0eaa3d706bd5c890",
-"canvaskit/canvaskit.js": "97937cb4c2c2073c968525a3e08c86a3",
+"canvaskit/skwasm.js": "1df4d741f441fa1a4d10530ced463ef8",
+"canvaskit/skwasm.wasm": "6711032e17bf49924b2b001cef0d3ea3",
+"canvaskit/chromium/canvaskit.js": "8c8392ce4a4364cbb240aa09b5652e05",
+"canvaskit/chromium/canvaskit.wasm": "fc18c3010856029414b70cae1afc5cd9",
+"canvaskit/canvaskit.js": "76f7d822f42397160c5dfc69cbc9b2de",
 "canvaskit/profiling/canvaskit.js": "c21852696bc1cc82e8894d851c01921a",
 "canvaskit/profiling/canvaskit.wasm": "371bc4e204443b0d5e774d64a046eb99",
-"canvaskit/canvaskit.wasm": "3de12d898ec208a5f31362cc00f09b9e"
-};
-
+"canvaskit/canvaskit.wasm": "f48eaf57cada79163ec6dec7929486ea",
+"canvaskit/skwasm.worker.js": "19659053a277272607529ef87acf9d8a"};
 // The application shell files that are downloaded before a service worker can
 // start.
-const CORE = [
-  "main.dart.js",
+const CORE = ["main.dart.js",
 "index.html",
 "assets/AssetManifest.json",
 "assets/FontManifest.json"];
+
 // During install, the TEMP cache is populated with the application shell files.
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -480,7 +493,6 @@ self.addEventListener("install", (event) => {
     })
   );
 });
-
 // During activate, the cache is populated with the temp files downloaded in
 // install. If this service worker is upgrading from one with a saved
 // MANIFEST, then use this to retain unchanged resource files.
@@ -502,6 +514,8 @@ self.addEventListener("activate", function(event) {
         await caches.delete(TEMP);
         // Save the manifest to make future upgrades efficient.
         await manifestCache.put('manifest', new Response(JSON.stringify(RESOURCES)));
+        // Claim client to enable caching on first launch
+        self.clients.claim();
         return;
       }
       var oldManifest = await manifest.json();
@@ -527,6 +541,8 @@ self.addEventListener("activate", function(event) {
       await caches.delete(TEMP);
       // Save the manifest to make future upgrades efficient.
       await manifestCache.put('manifest', new Response(JSON.stringify(RESOURCES)));
+      // Claim client to enable caching on first launch
+      self.clients.claim();
       return;
     } catch (err) {
       // On an unhandled exception the state of the cache cannot be guaranteed.
@@ -537,7 +553,6 @@ self.addEventListener("activate", function(event) {
     }
   }());
 });
-
 // The fetch handler redirects requests for RESOURCE files to the service
 // worker cache.
 self.addEventListener("fetch", (event) => {
@@ -577,7 +592,6 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
-
 self.addEventListener('message', (event) => {
   // SkipWaiting can be used to immediately activate a waiting service worker.
   // This will also require a page refresh triggered by the main worker.
@@ -590,7 +604,6 @@ self.addEventListener('message', (event) => {
     return;
   }
 });
-
 // Download offline will check the RESOURCES for all files not in the cache
 // and populate them.
 async function downloadOffline() {
@@ -611,7 +624,6 @@ async function downloadOffline() {
   }
   return contentCache.addAll(resources);
 }
-
 // Attempt to download the resource online before falling back to
 // the offline cache.
 function onlineFirst(event) {
